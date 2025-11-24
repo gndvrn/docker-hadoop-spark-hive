@@ -1,3 +1,3 @@
-#!/bin/bash
+set -e
 
-docker-compose up
+docker-compose up 2>&1 | tee compose-up.log

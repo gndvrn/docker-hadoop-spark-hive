@@ -1,104 +1,199 @@
-version: "3.7"
-
 services:
   namenode:
     image: hadoop-namenode:latest
     container_name: namenode
     hostname: namenode
     environment:
-      - CLUSTER_NAME=hadoop-hive-3.2.2
+      - CLUSTER_NAME=hadoop-hive-3.4.0
+    volumes:
+      - hadoop_namenode1:/hadoop/dfs/name
     env_file:
-      - core.env
-      - yarn-remote.env
+      - settings.env
     ports:
-      - "50070:50070"
+      - "9870:9870"
+      - "9000:9000"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9870"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  datanode:
+  datanode1:
     image: hadoop-datanode:latest
-    container_name: datanode
-    hostname: datanode
-    environment:
-      - SERVICE_PRECONDITION=namenode:50070
+    container_name: datanode1
+    hostname: datanode1
+    volumes:
+      - ./hdfs_disks/dn1:/hadoop/dfs/data
+    depends_on:
+      namenode:
+        condition: service_healthy
     env_file:
-      - core.env
-      - yarn-remote.env
-    ports:
-      - "50075:50075"
+      - settings.env
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9864"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  datanode2:
+    image: hadoop-datanode:latest
+    container_name: datanode2
+    hostname: datanode2
+    volumes:
+      - ./hdfs_disks/dn2:/hadoop/dfs/data
+    depends_on:
+      namenode:
+        condition: service_healthy
+    env_file:
+      - settings.env
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9864"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  datanode3:
+    image: hadoop-datanode:latest
+    container_name: datanode3
+    hostname: datanode3
+    volumes:
+      - ./hdfs_disks/dn3:/hadoop/dfs/data
+    depends_on:
+      namenode:
+        condition: service_healthy
+    env_file:
+      - settings.env
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9864"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   resourcemanager:
     image: hadoop-resourcemanager:latest
     container_name: resourcemanager
     hostname: resourcemanager
-    environment:
-      - SERVICE_PRECONDITION=namenode:50070 datanode:50075
+    depends_on:
+      namenode:
+        condition: service_healthy
+      datanode1:
+        condition: service_healthy
+      datanode2:
+        condition: service_healthy
+      datanode3:
+        condition: service_healthy
     env_file:
-      - core.env
-      - yarn-resource-manager.env
-    ports:
-      - "8088:8088"
+      - settings.env
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "8032"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
-  nodemanager:
+  nodemanager1:
     image: hadoop-nodemanager:latest
-    container_name: nodemanager
-    hostname: nodemanager
-    environment:
-      - SERVICE_PRECONDITION=namenode:50070 datanode:50075 resourcemanager:8088
+    container_name: nodemanager1
+    hostname: nodemanager1
+    depends_on:
+      namenode:
+        condition: service_healthy
+      datanode1:
+        condition: service_healthy
+      resourcemanager:
+        condition: service_started
     env_file:
-      - core.env
-      - yarn-node-manager.env
-    ports:
-      - "8042:8042"
+      - settings.env
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "8042"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  hs2:
-    image: hadoop-hiveserver:latest
-    container_name: hs2
-    hostname: hs2
-    environment:
-      - SERVICE_PRECONDITION=metastore:9083
+  nodemanager2:
+    image: hadoop-nodemanager:latest
+    container_name: nodemanager2
+    hostname: nodemanager2
+    depends_on:
+      namenode:
+        condition: service_healthy
+      datanode2:
+        condition: service_healthy
+      resourcemanager:
+        condition: service_started
     env_file:
-      - core.env
-      - yarn-remote.env
-      - hive.env
-    ports:
-      - "10000:10000"
-      - "10002:10002"
+      - settings.env
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "8042"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  metastore:
-    image: hadoop-hive-metastore:latest
-    container_name: metastore
-    hostname: metastore
-    environment:
-      - SERVICE_PRECONDITION=namenode:50070 datanode:50075 metastore-db:5432
+  nodemanager3:
+    image: hadoop-nodemanager:latest
+    container_name: nodemanager3
+    hostname: nodemanager3
+    depends_on:
+      namenode:
+        condition: service_healthy
+      datanode3:
+        condition: service_healthy
+      resourcemanager:
+        condition: service_started
     env_file:
-      - core.env
-      - yarn-remote.env
-      - hive.env
-      - metastore.env
+      - settings.env
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "8042"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  metastore-db:
-    image: hadoop-hive-metastore-db:latest
-    container_name: metastore-db
-    hostname: metastore-db
+  hive-metastore:
+    image: postgres:13
+    container_name: hive-metastore-postgres
+    hostname: postgres
+    env_file:
+      - settings.env
     environment:
-      POSTGRESQL_ADMIN_PASSWORD: postgres
+      - POSTGRES_DB=hive_metastore
+      - POSTGRES_USER=hive_user
+      - POSTGRES_PASSWORD=hive_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hive_user -d hive_metastore"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-   # historyserver:
-  #   image: hadoop-historyserver:latest
-  #   container_name: historyserver
-  #   hostname: historyserver
-  #   environment:
-  #     - SERVICE_PRECONDITION=namenode:9870 datanode:9864 resourcemanager:8088
-  #   env_file:
-  #     - core.env
-  #     - yarn-timeline.env
-  #   ports:
-  #     - "8188:8188"
+  hive-server:
+    image: hadoop-hive:latest
+    container_name: hive-server
+    volumes:
+      - hive_volume:/var/lib/postgresql/data
+    depends_on:
+      namenode:
+        condition: service_healthy
+      datanode1:
+        condition: service_healthy
+      datanode2:
+        condition: service_healthy
+      datanode3:
+        condition: service_healthy
+      hive-metastore:
+        condition: service_healthy
+    env_file:
+      - settings.env
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "10000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
-  # edgenode:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile.edgenode
-  #   container_name: edgenode
-  #   hostname: edgenode
+volumes:
+  postgres_data:
+  hive_volume:
+  hadoop_namenode1:
+  

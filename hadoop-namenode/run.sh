@@ -4,7 +4,7 @@ if [ -d "/tmp/hadoop-root/dfs/name/current" ]; then
     echo "Namenode formatted!"
 else
     echo "Formatting Namenode!"
-    ${HADOOP_HOME}/bin/hdfs --config ${HADOOP_CONF_DIR} namenode -format ${CLUSTER_NAME}
+    ${HADOOP_HOME}/bin/hdfs --config ${HADOOP_CONF_DIR} namenode -format ${CLUSTER_NAME} -force -nonInteractive
 fi
 
 echo "Starting Namenode!"

@@ -46,49 +46,8 @@ function configure() {
 configure ${HADOOP_CONF_DIR}/core-site.xml core CORE_CONF
 configure ${HADOOP_CONF_DIR}/hdfs-site.xml hdfs HDFS_CONF
 configure ${HADOOP_CONF_DIR}/yarn-site.xml yarn YARN_CONF
-configure ${HADOOP_CONF_DIR}/httpfs-site.xml httpfs HTTPFS_CONF
-configure ${HADOOP_CONF_DIR}/kms-site.xml kms KMS_CONF
 configure ${HADOOP_CONF_DIR}/mapred-site.xml mapred MAPRED_CONF
+configure ${HADOOP_CONF_DIR}/hive-site.xml hive HIVE_SITE_CONF
 configure ${HIVE_CONF_DIR}/hive-site.xml hive HIVE_SITE_CONF
-configure ${HIVE_CONF_DIR}/metastore-site.xml metastore METASTORE_SITE_CONF
-configure ${METASTORE_HOME}/conf/metastore-site.xml metastore METASTORE_STANDALONE_CONF
-configure ${TEZ_CONF_DIR}/tez-site.xml tez TEZ_SITE_CONF
-
-
-function waitForService() {
-
-    local servicePort=$1
-    local service=${servicePort%%:*}
-    local port=${servicePort#*:}
-    local retrySeconds=5
-    local max_try=100
-    let i=1
-
-    nc -z ${service} ${port}
-    result=$?
-
-    until [[ ${result} -eq 0 ]]; do
-
-        echo "[$i/$max_try] ${service}:${port} is not available yet"
-
-        if (( $i == $max_try )); then
-            echo "[$i/$max_try] ${service}:${port} is still not available; giving up after ${max_try} tries. :/"
-            exit 1
-        fi
-
-        let "i++"
-        sleep ${retrySeconds}
-
-        nc -z ${service} ${port}
-        result=$?
-    done
-
-    echo "[$i/$max_try] $service:${port} is available."
-}
-
-for i in ${SERVICE_PRECONDITION[@]}
-do
-    waitForService ${i}
-done
 
 exec $@
