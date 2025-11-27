@@ -25,10 +25,6 @@ echo "Building hadoop node manager image..."
 docker build --no-cache -t hadoop-nodemanager:latest ./hadoop-nodemanager
 echo "Done."
 
-# echo "Building hadoop history server image..."
-# docker build --no-cache -t hadoop-historyserver:latest ./hadoop-historyserver
-# echo "Done."
-
 echo "Building hive+hiveserver image..."
 docker build --no-cache -t hadoop-hive:latest -f ./hadoop-hive/Dockerfile .
 echo "Done."

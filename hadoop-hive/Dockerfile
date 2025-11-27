@@ -4,6 +4,10 @@ LABEL platform="dev-hadoop-hive"
 
 RUN apt-get update && apt-get install -y postgresql-client-13
 
+ENV HIVE_HOME=/opt/hive
+ENV PATH=${HIVE_HOME}/bin:$PATH
+ENV HIVE_CONF_DIR=${HIVE_HOME}/conf
+
 ARG HIVE_DOWNLOAD_DIR=/tmp/hive
 ARG HIVE_VERSION=4.1.0
 ARG POSTGRESQL_JDBC_VERSION=42.2.23
@@ -20,21 +24,25 @@ RUN tar -xvf /tmp/hive.tar.gz -C ${HIVE_DOWNLOAD_DIR} --strip-components=1 \
 
 RUN wget https://jdbc.postgresql.org/download/postgresql-${POSTGRESQL_JDBC_VERSION}.jar -O ${HIVE_HOME}/lib/postgresql-jdbc.jar
 
+RUN bash -c "source /opt/scripts/config_files_generator.sh && \
+    generate_config \"$HIVE_CONF_DIR\" HIVE_SITE_CONF hive-site.xml \"$ENV_FILE\" && \
+    generate_config \"$HIVE_CONF_DIR\" HIVESERVER2_SITE_CONF hiveserver2-site.xml \"$ENV_FILE\""
 
-EXPOSE 10000 10002
+# NYC Taxi data
 
-COPY hadoop-hive/run.sh /run.sh
-RUN chmod a+x /run.sh
+# Копируем заранее скачанные trips_*.gz внутрь контейнера
+COPY downloads/trips_*.gz /tmp/
 
 # NYC Taxi data loading script
 COPY hadoop-hive/load_nyc_taxi_data.sh /load_nyc_taxi_data.sh
 RUN chmod +x /load_nyc_taxi_data.sh
 
-# Command to run Hive
-COPY hadoop-core/entrypoint.sh /entrypoint.sh
-RUN chmod a+x /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["/run.sh"]
+COPY hadoop-hive/run.sh /run.sh
+RUN chmod a+x /run.sh
+
+EXPOSE 10000 10002
+
+ENTRYPOINT ["/run.sh"]
 
 
 

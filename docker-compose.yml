@@ -23,7 +23,7 @@ services:
     container_name: datanode1
     hostname: datanode1
     volumes:
-      - ./hdfs_disks/dn1:/hadoop/dfs/data
+      - /mnt/dn1:/hadoop/dfs/data
     depends_on:
       namenode:
         condition: service_healthy
@@ -40,7 +40,7 @@ services:
     container_name: datanode2
     hostname: datanode2
     volumes:
-      - ./hdfs_disks/dn2:/hadoop/dfs/data
+      - /mnt/dn2:/hadoop/dfs/data
     depends_on:
       namenode:
         condition: service_healthy
@@ -57,7 +57,7 @@ services:
     container_name: datanode3
     hostname: datanode3
     volumes:
-      - ./hdfs_disks/dn3:/hadoop/dfs/data
+      - /mnt/dn3:/hadoop/dfs/data
     depends_on:
       namenode:
         condition: service_healthy
@@ -84,12 +84,8 @@ services:
         condition: service_healthy
     env_file:
       - settings.env
-    healthcheck:
-      test: ["CMD", "nc", "-z", "localhost", "8032"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+    ports:
+      - "8088:8088"
 
   nodemanager1:
     image: hadoop-nodemanager:latest
@@ -186,6 +182,8 @@ services:
         condition: service_healthy
     env_file:
       - settings.env
+    ports:
+      - "10002:10002"
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "10000"]
       interval: 30s
@@ -196,4 +194,3 @@ volumes:
   postgres_data:
   hive_volume:
   hadoop_namenode1:
-  
