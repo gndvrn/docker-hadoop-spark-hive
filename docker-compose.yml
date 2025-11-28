@@ -29,6 +29,8 @@ services:
         condition: service_healthy
     env_file:
       - settings.env
+    ports:
+      - "9860:9864"
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "9864"]
       interval: 10s
@@ -46,6 +48,8 @@ services:
         condition: service_healthy
     env_file:
       - settings.env
+    ports:
+      - "9861:9864"
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "9864"]
       interval: 10s
@@ -63,6 +67,8 @@ services:
         condition: service_healthy
     env_file:
       - settings.env
+    ports:
+      - "9862:9864"
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "9864"]
       interval: 10s

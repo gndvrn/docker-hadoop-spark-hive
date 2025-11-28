@@ -21,10 +21,6 @@ RUN service ssh start
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-arm64
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
-# RUN ssh-keygen -q -t rsa -N "" -f ~/.ssh/id_rsa && \
-#     cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && \
-#     chmod 0600 ~/.ssh/authorized_keys
-
 ENV HADOOP_VERSION=3.4.0
 ENV HADOOP_HOME=/opt/hadoop
 ENV HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+export HADOOP_OPTS="$HADOOP_OPTS --add-opens java.base/java.lang=ALL-UNNAMED"
+export HADOOP_OPTS="$HADOOP_OPTS --add-opens java.base/java.lang.reflect=ALL-UNNAMED"
+
 if [ -d "/tmp/hadoop-root/dfs/name/current" ]; then
     echo "Namenode formatted!"
 else

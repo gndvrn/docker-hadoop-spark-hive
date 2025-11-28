@@ -2,5 +2,6 @@
 .idea
 *.iml
 .dccache
-*.gz
+downloads/*
 *.log
+*.txt
