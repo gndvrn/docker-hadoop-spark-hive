@@ -28,3 +28,7 @@ echo "Done."
 echo "Building hive+hiveserver image..."
 docker build --no-cache -t hadoop-hive:latest -f ./hadoop-hive/Dockerfile .
 echo "Done."
+
+echo "Building spark-yarn-jupyter image..."
+docker build --no-cache -t spark-yarn:latest -f ./spark-yarn/Dockerfile .
+echo "Done."

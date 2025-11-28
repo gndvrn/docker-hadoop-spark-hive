@@ -10,7 +10,7 @@ services:
     env_file:
       - settings.env
     ports:
-      - "9870:9870"
+      - "9870:9870" # NameNode 1 UI
       - "9000:9000"
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "9870"]
@@ -30,7 +30,7 @@ services:
     env_file:
       - settings.env
     ports:
-      - "9860:9864"
+      - "9860:9864" # Datanode 1 UI
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "9864"]
       interval: 10s
@@ -49,7 +49,7 @@ services:
     env_file:
       - settings.env
     ports:
-      - "9861:9864"
+      - "9861:9864" # Datanode 2 UI
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "9864"]
       interval: 10s
@@ -68,7 +68,7 @@ services:
     env_file:
       - settings.env
     ports:
-      - "9862:9864"
+      - "9862:9864" # Datanode 3 UI
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "9864"]
       interval: 10s
@@ -91,7 +91,7 @@ services:
     env_file:
       - settings.env
     ports:
-      - "8088:8088"
+      - "8088:8088" # ResourceManager UI
 
   nodemanager1:
     image: hadoop-nodemanager:latest
@@ -106,6 +106,8 @@ services:
         condition: service_started
     env_file:
       - settings.env
+    ports:
+      - "8043:8042" # NodeManager 1 UI
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "8042"]
       interval: 10s
@@ -125,6 +127,8 @@ services:
         condition: service_started
     env_file:
       - settings.env
+    ports:
+      - "8044:8042" # NodeManager 2 UI
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "8042"]
       interval: 10s
@@ -144,6 +148,8 @@ services:
         condition: service_started
     env_file:
       - settings.env
+    ports:
+      - "8045:8042" # NodeManager 3 UI
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "8042"]
       interval: 10s
@@ -189,12 +195,27 @@ services:
     env_file:
       - settings.env
     ports:
-      - "10002:10002"
+      - "10002:10002" # HiveServer2 UI
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "10000"]
       interval: 30s
       timeout: 10s
       retries: 5
+
+  spark-jupyter:
+    image: spark-yarn:latest
+    container_name: spark_jupyter
+    hostname: spark
+    volumes:
+      - ./notebooks:/notebooks
+    working_dir: /notebooks
+    depends_on:
+       - namenode
+       - datanode1
+       - resourcemanager
+       - nodemanager1
+    ports:
+       - "8888:8888" # Jupyter Notebook for pyspark
 
 volumes:
   postgres_data:
