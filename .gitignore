@@ -3,5 +3,6 @@
 *.iml
 .dccache
 downloads/*
+!downloads/.gitkeep
 *.log
 *.txt

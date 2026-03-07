@@ -1,6 +1,9 @@
 services:
   namenode:
     image: hadoop-namenode:latest
+    build:
+      context: ./hadoop-namenode/
+      dockerfile: Dockerfile
     container_name: namenode
     hostname: namenode
     environment:
@@ -20,6 +23,9 @@ services:
 
   datanode1:
     image: hadoop-datanode:latest
+    build:
+      context: ./hadoop-datanode/
+      dockerfile: Dockerfile
     container_name: datanode1
     hostname: datanode1
     volumes:
@@ -39,6 +45,9 @@ services:
 
   datanode2:
     image: hadoop-datanode:latest
+    build:
+      context: ./hadoop-datanode/
+      dockerfile: Dockerfile
     container_name: datanode2
     hostname: datanode2
     volumes:
@@ -58,6 +67,9 @@ services:
 
   datanode3:
     image: hadoop-datanode:latest
+    build:
+      context: ./hadoop-datanode/
+      dockerfile: Dockerfile  
     container_name: datanode3
     hostname: datanode3
     volumes:
@@ -77,6 +89,9 @@ services:
 
   resourcemanager:
     image: hadoop-resourcemanager:latest
+    build:
+      context: ./hadoop-resourcemanager/
+      dockerfile: Dockerfile
     container_name: resourcemanager
     hostname: resourcemanager
     depends_on:
@@ -95,6 +110,9 @@ services:
 
   nodemanager1:
     image: hadoop-nodemanager:latest
+    build:
+      context: ./hadoop-nodemanager/
+      dockerfile: Dockerfile
     container_name: nodemanager1
     hostname: nodemanager1
     depends_on:
@@ -116,6 +134,9 @@ services:
 
   nodemanager2:
     image: hadoop-nodemanager:latest
+    build:
+      context: ./hadoop-nodemanager/
+      dockerfile: Dockerfile
     container_name: nodemanager2
     hostname: nodemanager2
     depends_on:
@@ -137,6 +158,9 @@ services:
 
   nodemanager3:
     image: hadoop-nodemanager:latest
+    build:
+      context: ./hadoop-nodemanager/
+      dockerfile: Dockerfile
     container_name: nodemanager3
     hostname: nodemanager3
     depends_on:
@@ -178,6 +202,9 @@ services:
 
   hive-server:
     image: hadoop-hive:latest
+    build:
+      context: .
+      dockerfile: ./hadoop-hive/Dockerfile
     container_name: hive-server
     volumes:
       - hive_volume:/var/lib/postgresql/data
@@ -204,6 +231,9 @@ services:
 
   spark-jupyter:
     image: spark-yarn:latest
+    build:
+      context: .
+      dockerfile: ./spark-yarn/Dockerfile
     container_name: spark_jupyter
     hostname: spark
     volumes:
