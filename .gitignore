@@ -4,5 +4,6 @@
 .dccache
 downloads/*
 !downloads/.gitkeep
+/notebooks/.ipynb_checkpoints/*
 *.log
 *.txt
